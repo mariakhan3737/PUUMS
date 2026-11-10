@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QMainWindow, QPushButton, QTabWidget,
                              QVBoxLayout, QWidget)
 
-from ui_common import SqlLogDock, secondary
+from app.ui.ui_common import SqlLogDock, secondary
 
 
 class PortalWindow(QMainWindow):

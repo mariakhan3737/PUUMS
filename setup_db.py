@@ -1,7 +1,7 @@
 """
 Builds the PUUMS database from the sql/ folder (drops and recreates `puums`).
 
-    python setup_db.py                 # uses config.py
+    python setup_db.py                 # uses app/config.py
     python setup_db.py --no-seed       # schema + triggers + views + procedures only
 
 Handles the DELIMITER blocks used by triggers/procedures, so you don't need
@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pymysql
 
-import config
+from app import config
 
-SQL_DIR = Path(__file__).parent / "sql"
+SQL_DIR = Path(__file__).resolve().parent / "sql"
 FILES = ["01_schema.sql", "02_triggers.sql", "03_views.sql", "04_procedures.sql", "05_seed.sql"]
 
 

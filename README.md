@@ -8,14 +8,14 @@ Tested on **MySQL 8.0** and MariaDB 10.11, Python 3.10+.
 ```bat
 pip install -r requirements.txt
 ```
-1. Open `config.py` and put your MySQL root password in `DB_PASSWORD`.
+1. Open `app/config.py` and put your MySQL root password in `DB_PASSWORD`.
 2. Build the database (drops and recreates `puums`, then loads demo data):
    ```bat
    python setup_db.py
    ```
 3. Run the app:
    ```bat
-   python app\main.py
+   python main.py
    ```
 Re-run `setup_db.py` right before the demo to start from clean data.
 
@@ -96,7 +96,7 @@ Interpretation choices worth knowing if asked:
 ## 6. Files
 
 ```
-config.py              MySQL connection settings
+app/config.py          MySQL connection settings
 setup_db.py            builds the database (handles DELIMITER)
 sql/01_schema.sql      20 tables
 sql/02_triggers.sql    triggers
@@ -104,6 +104,11 @@ sql/03_views.sql       views
 sql/04_procedures.sql  stored procedures
 sql/05_seed.sql        Karachi pilot data (Aug & Sep billed, Oct partly read)
 sql/06_demo_queries.sql queries per screen + constraint/ACID demos
-app/main.py            start here
-app/*_portal.py        Citizen / Employee / Admin portals
+main.py                start here (loads Tahoma font + XP Luna theme)
+app/ui/xp_style.py     Windows XP Luna QSS stylesheet
+app/ui/ui_common.py    shared widgets and helpers
+app/ui/login_window.py login + registration screens
+app/portals/           Citizen / Employee / Admin portals
+assets/fonts/          Tahoma font (XP system font)
+docs/                  project documentation
 ```

@@ -3,9 +3,9 @@ from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import (QDateEdit, QDoubleSpinBox, QFormLayout, QGroupBox, QHBoxLayout,
                              QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget)
 
-from db import DBError
-from portal_base import PortalWindow
-from ui_common import PlaceholderTab, error, fill_table, fmt, info, kpi_card, make_table, title
+from app.db import DBError
+from app.portals.portal_base import PortalWindow
+from app.ui.ui_common import PlaceholderTab, error, fill_table, fmt, info, kpi_card, make_table, title
 
 
 class EmployeePortal(PortalWindow):

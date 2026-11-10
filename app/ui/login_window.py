@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import (QComboBox, QFormLayout, QGroupBox, QHBoxLayout, QLa
                              QLineEdit, QMainWindow, QPushButton, QStackedWidget,
                              QVBoxLayout, QWidget)
 
-from db import DBError
-from ui_common import error, info, secondary
+from app.db import DBError
+from app.ui.ui_common import error, info, secondary
 
 
 class LoginWindow(QMainWindow):

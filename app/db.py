@@ -2,13 +2,10 @@
 panel, so during the demo you can show the exact query behind each screen."""
 import datetime
 import re
-import sys
-from pathlib import Path
 
 import pymysql
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-import config  # noqa: E402
+from app import config
 
 _listeners = []
 

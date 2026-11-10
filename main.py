@@ -1,25 +1,33 @@
-"""PUUMS desktop app entry point:   python app/main.py"""
+"""PUUMS desktop app entry point:   python main.py"""
 import sys
+from pathlib import Path
 
+from PyQt5.QtGui import QFontDatabase
 from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from admin_portal import AdminPortal
-from citizen_portal import CitizenPortal
-from db import Database
-from employee_portal import EmployeePortal
-from login_window import LoginWindow
-from ui_common import STYLE
+from app.portals.admin_portal import AdminPortal
+from app.portals.citizen_portal import CitizenPortal
+from app.db import Database
+from app.portals.employee_portal import EmployeePortal
+from app.ui.login_window import LoginWindow
+from app.ui.ui_common import STYLE
 
 
 class App:
     def __init__(self):
         self.qt = QApplication(sys.argv)
+
+        # Load Tahoma font (the Windows XP system font)
+        font_path = Path(__file__).resolve().parent / "assets" / "fonts" / "tahoma.ttf"
+        if font_path.exists():
+            QFontDatabase.addApplicationFont(str(font_path))
+
         self.qt.setStyleSheet(STYLE)
         try:
             self.db = Database()
         except Exception as e:  # noqa: BLE001
             QMessageBox.critical(None, "Cannot connect to MySQL",
-                                 f"{e}\n\nCheck config.py and run setup_db.py first.")
+                                 f"{e}\n\nCheck app/config.py and run setup_db.py first.")
             sys.exit(1)
         self.login = LoginWindow(self.db)
         self.login.logged_in.connect(self.open_portal)

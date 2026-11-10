@@ -6,9 +6,9 @@ from PyQt5.QtWidgets import (QComboBox, QDateEdit, QDoubleSpinBox, QFormLayout, 
                              QProgressBar, QPushButton, QSplitter, QTableWidgetItem,
                              QVBoxLayout, QWidget)
 
-from db import DBError
-from portal_base import PortalWindow
-from ui_common import (PlaceholderTab, error, fill_table, fmt, info, kpi_card, make_table,
+from app.db import DBError
+from app.portals.portal_base import PortalWindow
+from app.ui.ui_common import (PlaceholderTab, error, fill_table, fmt, info, kpi_card, make_table,
                        secondary, selected_row, title)
 
 

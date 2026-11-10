@@ -9,34 +9,10 @@ from PyQt5.QtWidgets import (QAbstractItemView, QDockWidget, QFrame, QHBoxLayout
                              QPushButton, QTableWidget, QTableWidgetItem,
                              QVBoxLayout, QWidget)
 
-import db
+from app import db
+from app.ui.xp_style import XP_STYLE
 
-STYLE = """
-QWidget { font-family: 'Segoe UI', 'Noto Sans', Arial; font-size: 10pt; color: #1f2933; }
-QMainWindow, QDialog { background: #f5f6f8; }
-QTabWidget::pane { border: 1px solid #d9dde3; background: white; border-radius: 4px; }
-QTabBar::tab { padding: 8px 14px; background: #e9ecf0; border: 1px solid #d9dde3;
-               border-bottom: none; margin-right: 2px; }
-QTabBar::tab:selected { background: white; color: #4a2a6b; font-weight: 600; }
-QLabel#title { font-size: 15pt; font-weight: 700; color: #4a2a6b; }
-QLabel#kpi   { font-size: 16pt; font-weight: 700; color: #4a2a6b; }
-QLabel#muted { color: #6b7280; }
-QPushButton { background: #4a2a6b; color: white; border: none; padding: 7px 14px;
-              border-radius: 4px; }
-QPushButton:hover { background: #5d3a85; }
-QPushButton:disabled { background: #b8adc6; }
-QPushButton[secondary="true"] { background: #e9ecf0; color: #1f2933; }
-QLineEdit, QComboBox, QDateEdit, QDoubleSpinBox, QSpinBox, QPlainTextEdit {
-    padding: 5px; border: 1px solid #c9ced6; border-radius: 4px; background: white; }
-QTableWidget { gridline-color: #e5e7eb; background: white;
-               selection-background-color: #e7dcf3; selection-color: #1f2933; }
-QHeaderView::section { background: #eef0f3; padding: 5px; border: none;
-                       border-bottom: 1px solid #d9dde3; font-weight: 600; }
-QGroupBox { font-weight: 600; border: 1px solid #d9dde3; border-radius: 4px;
-            margin-top: 10px; padding-top: 12px; background: white; }
-QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 4px; }
-QFrame#card { background: white; border: 1px solid #d9dde3; border-radius: 6px; }
-"""
+STYLE = XP_STYLE
 
 
 def fmt(value):
@@ -153,9 +129,9 @@ class SqlLogDock(QDockWidget):
         lay.setContentsMargins(4, 4, 4, 4)
         self.text = QPlainTextEdit()
         self.text.setReadOnly(True)
-        font = QFont("Consolas")
+        font = QFont("Lucida Console")
         font.setStyleHint(QFont.Monospace)
-        font.setPointSize(9)
+        font.setPointSize(8)
         self.text.setFont(font)
         bar = QHBoxLayout()
         clear = secondary(QPushButton("Clear"))

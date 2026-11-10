@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Context and private evaluation documents (not to be pushed)
+Context_files_Ignored_For_Git_/
+
+# Build artifacts & distribution
+build/
+dist/
+*.spec
+packaging/build/
+packaging/dist/
+packaging/*.spec
+
+# Local environment / IDE
+.vscode/
+.idea/
+*.log
+.env
+venv/
