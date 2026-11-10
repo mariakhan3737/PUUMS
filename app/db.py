@@ -1,95 +1,110 @@
-"""Thin database layer. Every statement the GUI runs is sent to the SQL log
-panel, so during the demo you can show the exact query behind each screen."""
-import datetime
-import re
+# db.py
+# This file connects to MySQL and runs all our queries.
+# Every screen uses these functions instead of talking to MySQL directly.
 
 import pymysql
-
 from app import config
 
-_listeners = []
+# the SQL log box at the bottom of the window registers itself here,
+# so every query we run can be shown on the screen
+log_function = None
 
 
-def on_sql(callback):
-    """Register a function(str) that receives every executed SQL statement."""
-    _listeners.append(callback)
+def on_sql(function):
+    global log_function
+    log_function = function
 
 
-def _emit(text):
-    stamp = datetime.datetime.now().strftime("%H:%M:%S")
-    one_line = re.sub(r"\s+", " ", text).strip()
-    for cb in _listeners:
-        cb(f"-- {stamp}\n{one_line};\n")
+def show_in_log(text):
+    print(text)
+    if log_function is not None:
+        log_function(text + ";\n")
 
 
+# our own error, the screens catch this and show the message in a popup
 class DBError(Exception):
-    """Raised with the MySQL message (trigger / constraint text) for the UI."""
+    pass
 
 
 class Database:
+
     def __init__(self):
-        self.conn = pymysql.connect(
-            host=config.DB_HOST, port=config.DB_PORT, user=config.DB_USER,
-            password=config.DB_PASSWORD, database=config.DB_NAME,
-            charset="utf8mb4", collation="utf8mb4_unicode_ci", autocommit=True)
+        # open the connection to MySQL using the details in config.py
+        self.conn = pymysql.connect(host=config.DB_HOST,
+                                    port=config.DB_PORT,
+                                    user=config.DB_USER,
+                                    password=config.DB_PASSWORD,
+                                    database=config.DB_NAME,
+                                    charset="utf8mb4",
+                                    collation="utf8mb4_unicode_ci",
+                                    autocommit=True)
 
-    def _run(self, cur, sql, params=None):
-        text = cur.mogrify(sql, params) if params is not None else sql
-        _emit(text)
+    def run(self, cursor, sql, params=None):
+        # show the query (with the real values filled in) in the log
+        show_in_log(cursor.mogrify(sql, params))
         try:
-            cur.execute(sql, params)
+            cursor.execute(sql, params)
         except pymysql.MySQLError as e:
-            _emit(f"-- ERROR: {e.args[1] if len(e.args) > 1 else e}")
-            raise DBError(e.args[1] if len(e.args) > 1 else str(e)) from e
+            # e.args[1] is the message from MySQL, for example from a trigger
+            message = str(e.args[1])
+            show_in_log("ERROR: " + message)
+            raise DBError(message)
 
+    # SELECT -> returns column names and rows
     def query(self, sql, params=None):
-        """SELECT -> (column_names, rows)."""
-        with self.conn.cursor() as cur:
-            self._run(cur, sql, params)
-            cols = [d[0] for d in cur.description] if cur.description else []
-            rows = cur.fetchall()
-            while cur.nextset():
-                pass
-            return cols, list(rows)
+        cursor = self.conn.cursor()
+        self.run(cursor, sql, params)
+        rows = cursor.fetchall()
+        columns = []
+        for col in cursor.description:
+            columns.append(col[0])
+        cursor.close()
+        return columns, list(rows)
 
+    # SELECT that should return only one row
     def one(self, sql, params=None):
-        _, rows = self.query(sql, params)
-        return rows[0] if rows else None
+        columns, rows = self.query(sql, params)
+        if len(rows) == 0:
+            return None
+        return rows[0]
 
+    # INSERT / UPDATE / DELETE
     def execute(self, sql, params=None):
-        """INSERT/UPDATE/DELETE -> lastrowid."""
-        with self.conn.cursor() as cur:
-            self._run(cur, sql, params)
-            while cur.nextset():
-                pass
-            return cur.lastrowid
+        cursor = self.conn.cursor()
+        self.run(cursor, sql, params)
+        new_id = cursor.lastrowid
+        cursor.close()
+        return new_id
 
+    # CALL a stored procedure
+    # out_vars are the @variables the procedure fills, e.g. ("@pid", "@msg")
     def call(self, sql, params=None, out_vars=()):
-        """CALL a procedure. Returns (result_rows, out_values)."""
-        with self.conn.cursor() as cur:
-            self._run(cur, sql, params)
-            rows = []
-            while True:
-                if cur.description:
-                    rows.extend(cur.fetchall())
-                if not cur.nextset():
-                    break
-        out = ()
-        if out_vars:
-            out = self.one("SELECT " + ", ".join(out_vars))
-        return rows, out
+        cursor = self.conn.cursor()
+        self.run(cursor, sql, params)
+        rows = []
+        # a procedure can send back more than one result, so read all of them
+        while True:
+            if cursor.description is not None:
+                rows = rows + list(cursor.fetchall())
+            if not cursor.nextset():
+                break
+        cursor.close()
 
+        out_values = ()
+        if len(out_vars) > 0:
+            out_values = self.one("SELECT " + ", ".join(out_vars))
+        return rows, out_values
+
+    # run many statements together: either all of them are saved or none
     def transaction(self, statements):
-        """Run [(sql, params), ...] atomically from Python (START/COMMIT/ROLLBACK)."""
-        with self.conn.cursor() as cur:
-            self._run(cur, "START TRANSACTION")
-            try:
-                ids = []
-                for sql, params in statements:
-                    self._run(cur, sql, params)
-                    ids.append(cur.lastrowid)
-                self._run(cur, "COMMIT")
-                return ids
-            except DBError:
-                self._run(cur, "ROLLBACK")
-                raise
+        cursor = self.conn.cursor()
+        self.run(cursor, "START TRANSACTION")
+        try:
+            for sql, params in statements:
+                self.run(cursor, sql, params)
+            self.run(cursor, "COMMIT")
+        except DBError:
+            self.run(cursor, "ROLLBACK")
+            cursor.close()
+            raise
+        cursor.close()
